@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CircadianFit ID - Panduan Latihan, Peregangan & Nutrisi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #f1f5f9;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Custom subtle scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-28 selection:bg-emerald-500/30 selection:text-emerald-200">
+
+    <!-- Header & Circadian Status Bar -->
+    <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between gap-2">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">CircadianFit <span class="text-emerald-400">20</span></h1>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Program Hipertrofi, Mobilitas & Surplus Kalori (WIT)</p>
+                </div>
+                <div class="text-right">
+                    <div id="liveClock" class="text-sm font-bold text-emerald-400 tabular-nums">--:-- WIT</div>
+                    <div id="circadianBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/80 inline-block mt-0.5">
+                        Memuat Fase...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Daily Progress Bar -->
+            <div class="mt-3">
+                <div class="flex justify-between items-center text-[11px] mb-1">
+                    <span class="text-slate-400 font-medium">Progres Harian (<span id="selectedDayLabel" class="text-slate-200 font-semibold">Hari Ini</span>)</span>
+                    <span id="dailyProgressText" class="text-emerald-400 font-bold tabular-nums">0%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="dailyProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-xl mx-auto px-4 pt-4 space-y-5">
+
+        <!-- TAB 1: JADWAL HARIAN & JAM BIOLOGIS -->
+        <section id="tab-jadwal" class="space-y-4">
+            
+            <!-- Circadian Phase Info Card -->
+            <div id="circadianCard" class="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/30 border border-slate-800 p-4 shadow-lg">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider font-bold text-emerald-400">Status Jam Biologis Saat Ini</span>
+                        <h2 id="phaseTitle" class="text-sm sm:text-base font-bold text-white mt-0.5">Fase Pemulihan & Tidur</h2>
+                        <p id="phaseDesc" class="text-xs text-slate-300 mt-1 leading-relaxed">
+                            Tubuh memproduksi Human Growth Hormone (HGH) maksimal saat tidur 7–8 jam untuk memperbaiki mikro-trauma serat otot.
+                        </p>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day Selector Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1" id="daySelector">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Built-in Rest & Plank/Stretch Timer -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-md">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Timer Plank, Stretch & Jeda Set
+                        </h3>
+                        <p class="text-[11px] text-slate-400">Gunakan untuk menahan posisi statis atau jeda antar-set</p>
+                    </div>
+                    <div id="timerDisplay" class="text-2xl sm:text-3xl font-extrabold tabular-nums text-amber-400 tracking-tight">
+                        00:45
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button onclick="setTimerPreset(30)" class="preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">30 dtk</button>
+                    <button onclick="setTimerPreset(45)" class="preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition">45 dtk</button>
+                    <button onclick="setTimerPreset(60)" class="preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">60 dtk</button>
+                    <button onclick="setTimerPreset(90)" class="preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">90 dtk</button>
+                </div>
+
+                <!-- Controls -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="timerToggleBtn" onclick="toggleTimer()" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition shadow-sm flex items-center justify-center gap-1.5">
+                        <span id="timerToggleText">Mulai Timer</span>
+                    </button>
+                    <button onclick="resetTimer()" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- SESI 1: PAGI (06.00 - 08.00) -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">06.00 – 08.00 WIT • Sesi Pagi</span>
+                        <h3 class="text-sm font-bold text-white">Peregangan Dinamis & Mobilitas Sendi</h3>
+                    </div>
+                    <span class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20">10–15 Mnt</span>
+                </div>
+                <div id="morningStretchList" class="divide-y divide-slate-800/80">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- SESI 2: SORE (16.00 - 18.00) LATIHAN OTOT SPLIT -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between gap-2">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">16.00 – 18.00 WIT • Sesi Sore</span>
+                        <h3 id="workoutSessionTitle" class="text-sm font-bold text-white">Latihan Otot: Betis & Perut</h3>
+                    </div>
+                    <span id="workoutRecoveryTag" class="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shrink-0">Jeda 24–48 Jam</span>
+                </div>
+                <div id="afternoonWorkoutList" class="divide-y divide-slate-800/80">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- SESI 3: PEREGANGAN STATIS PASCA-LATIHAN -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Pasca-Latihan Sore • Pendinginan</span>
+                        <h3 class="text-sm font-bold text-white">Peregangan Statis & Relaksasi Saraf</h3>
+                    </div>
+                    <span class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">10–15 Mnt</span>
+                </div>
+                <div id="eveningStretchList" class="divide-y divide-slate-800/80">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TAB 2: POLA MAKAN & KALORI BOOSTER -->
+        <section id="tab-nutrisi" class="hidden space-y-4">
+            
+            <!-- Nutrition Strategy Banner -->
+            <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/20 border border-slate-800 p-4">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Strategi Tubuh Kurus & Kering</span>
+                <h2 class="text-sm sm:text-base font-bold text-white mt-0.5">Surplus Kalori Bersih: Nasi + Ikan + Kemasan</h2>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Nasi dan ikan adalah fondasi utama protein dan glikogen. Produk kemasan digunakan di jam selingan untuk menutup kekurangan kalori tanpa membuat perut begah (tanpa ikan kaleng).
+                </p>
+            </div>
+
+            <!-- Hydration Tracker -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Hidrasi & Elastisitas Otot</span>
+                        <h3 class="text-sm font-bold text-white">Target Air Putih: 2,5 – 3 Liter / Hari</h3>
+                    </div>
+                    <div class="text-right">
+                        <span id="waterCountText" class="text-base font-extrabold text-cyan-400 tabular-nums">0 / 12</span>
+                        <span class="block text-[10px] text-slate-400">Gelas (~250ml)</span>
+                    </div>
+                </div>
+                <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mb-3">
+                    <div id="waterProgressBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-400 transition-all duration-300 rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="updateWater(-1)" class="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition">- 1 Gelas</button>
+                    <button onclick="updateWater(1)" class="flex-1 py-2 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition">+ Tambah 1 Gelas (250ml)</button>
+                </div>
+            </div>
+
+            <!-- Daily Meal Schedule Checklist -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Jadwal Makan Harian</span>
+                        <h3 class="text-sm font-bold text-white">3 Sesi Utama + 2 Selingan Kalori</h3>
+                    </div>
+                    <span id="mealDayBadge" class="text-[11px] font-semibold text-slate-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">Hari Ini</span>
+                </div>
+                <div id="mealScheduleList" class="divide-y divide-slate-800/80">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TAB 3: STOK KEMASAN BULANAN & PANDUAN TEKNIK -->
+        <section id="tab-panduan" class="hidden space-y-4">
+            
+            <!-- Monthly Packaged Food Checklist -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Belanja Bulanan (Tanpa Ikan Kaleng)</span>
+                        <h3 class="text-sm font-bold text-white">Stok Produk Kemasan Penambah Kalori</h3>
+                    </div>
+                    <span id="groceryCountBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/20">0/5 Siap</span>
+                </div>
+                <div id="groceryList" class="divide-y divide-slate-800/80">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="p-3.5 bg-slate-950/60 border-t border-slate-800/80">
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        <strong class="text-slate-200">Tips Penyimpanan:</strong> Pindahkan susu bubuk, oatmeal, dan biskuit yang sudah dibuka ke dalam stoples kedap udara agar tidak melempem atau berjamur selama 1 bulan.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Biomechanics & Technique Rules (85-90% Factor) -->
+            <div class="space-y-3">
+                <div class="px-1">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">Faktor 85% – 90% Keberhasilan</span>
+                    <h3 class="text-base font-bold text-white">Koreksi Teknik & Aturan Pemulihan</h3>
+                </div>
+
+                <!-- Card 1: Calf Raises -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-emerald-400">1. Biomekanika Calf Raises (Betis)</h4>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 font-semibold">Wajib Kontrol</span>
+                    </div>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc pl-4 leading-relaxed">
+                        <li><strong class="text-white">Posisi Kaki Lurus Netral:</strong> Arahkan ujung kaki lurus ke depan. Klaim memutar ujung kaki ke dalam/luar untuk mengisolasi sisi betis berbeda memiliki efek sangat kecil dan berisiko menekan engkel/lutut.</li>
+                        <li><strong class="text-white">Hindari Pantulan Tendon:</strong> Jangan memantul cepat di posisi bawah. Turunkan tumit perlahan (2–3 detik) sampai betis meregang penuh, tahan 1 detik di puncak kontraksi.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Plank Alignment -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-sky-400">2. Postur Plank Presisi (Core)</h4>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 font-semibold">Anti Cedera Pinggang</span>
+                    </div>
+                    <ul class="text-xs text-slate-300 space-y-1.5 list-disc pl-4 leading-relaxed">
+                        <li><strong class="text-white">Posterior Pelvic Tilt:</strong> Kencangkan bokong dan selipkan panggul sedikit ke dalam agar tubuh membentuk satu garis lurus dari tumit hingga bahu.</li>
+                        <li><strong class="text-white">Hindari 3 Kesalahan Fatal:</strong> Pinggul naik terlalu tinggi (beban lari ke bahu), pinggang jatuh melengkung ke bawah (menekan tulang belakang), atau kepala terkulai menunduk.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3: Rest & 8-Week Timeline -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-amber-400">3. Jeda 24–48 Jam & Progres 8 Minggu</h4>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold">Hipertrofi</span>
+                    </div>
+                    <div class="text-xs text-slate-300 space-y-1.5 leading-relaxed">
+                        <p><strong class="text-white">Mengapa Betis & Perut Tetap Butuh Jeda:</strong> Otot dan tendon Achilles membutuhkan waktu 24–48 jam untuk sintesis protein dan perbaikan mikro-trauma. Tidur 7–8 jam setiap malam adalah kunci utama pelepasan hormon pertumbuhan.</p>
+                        <div class="grid grid-cols-2 gap-2 pt-1.5">
+                            <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                                <span class="text-[10px] font-bold text-slate-400 block">Minggu 1–4</span>
+                                <span class="text-[11px] text-slate-200">Adaptasi saraf, keseimbangan engkel, dan pengencangan awal otot.</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800">
+                                <span class="text-[10px] font-bold text-emerald-400 block">Minggu 6–8+</span>
+                                <span class="text-[11px] text-slate-200">Hipertrofi terukur (lingkar betis & ketebalan lengan bertambah nyata).</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Data Utility -->
+            <div class="pt-2 pb-4 text-center">
+                <button onclick="resetDailyProgress()" class="text-[11px] text-slate-500 hover:text-rose-400 underline transition">
+                    Reset Centang Harian untuk Hari Ini
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile-First) -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 backdrop-blur-md border-t border-slate-800">
+        <div class="max-w-xl mx-auto grid grid-cols-3 h-16">
+            <button onclick="switchTab('jadwal')" id="nav-jadwal" class="nav-btn flex flex-col items-center justify-center gap-1 text-emerald-400 font-semibold transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-[11px]">Jadwal & Latihan</span>
+            </button>
+            <button onclick="switchTab('nutrisi')" id="nav-nutrisi" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 font-medium transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-[11px]">Makan & Kalori</span>
+            </button>
+            <button onclick="switchTab('panduan')" id="nav-panduan" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-200 font-medium transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                <span class="text-[11px]">Stok & Teknik</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Custom Toast Message Box (No alert()) -->
+    <div id="toastBox" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-white shadow-xl opacity-0 pointer-events-none transition-opacity duration-300">
+        Pesan notifikasi
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DATA STRUKTUR PROGRAM LENGKAP
+        // ==========================================
+        const DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        const MORNING_STRETCHES = [
+            {
+                id: 'ms_catcow',
+                name: 'Cat-Cow Stretch',
+                target: '10 repetisi perlahan',
+                cue: 'Posisi merangkak; lengkungkan punggung ke atas lalu turunkan dada perlahan untuk melumasi tulang belakang.'
+            },
+            {
+                id: 'ms_wgs',
+                name: 'World’s Greatest Stretch',
+                target: '5 repetisi per sisi',
+                cue: 'Posisi lunge, tangan di lantai dalam kaki depan, putar dada & angkat satu lengan ke langit-langit.'
+            },
+            {
+                id: 'ms_windmill',
+                name: 'Thoracic Windmill',
+                target: '8 repetisi per sisi',
+                cue: 'Berbaring miring lutut ditekuk 90°, buka lengan atas memutar ke sisi berlawanan hingga menyentuh lantai.'
+            },
+            {
+                id: 'ms_calfpump',
+                name: 'Dynamic Calf & Hamstring Pumps',
+                target: '12 repetisi bergantian',
+                cue: 'Posisi downward dog, tekan tumit kiri dan kanan bergantian ke lantai secara terkendali.'
+            }
+        ];
+
+        const EVENING_STRETCHES = [
+            {
+                id: 'es_hamstring',
+                name: 'Standing Hamstring Stretch',
+                target: 'Tahan 30 detik x 2 set',
+                cue: 'Bungkukkan badan perlahan ke depan tanpa menghentak untuk meregangkan paha belakang.'
+            },
+            {
+                id: 'es_calfwall',
+                name: 'Calf Wall Stretch (Gastrocnemius & Soleus)',
+                target: 'Tahan 30 detik/kaki x 2 set',
+                cue: 'Menghadap dinding, tumit menempel penuh di lantai, dorong pinggul ke depan perlahan.'
+            },
+            {
+                id: 'es_doorway',
+                name: 'Pectoral & Biceps Doorway Stretch',
+                target: 'Tahan 30 detik x 2 set',
+                cue: 'Siku 90° di kusen pintu, condongkan tubuh pelan ke depan untuk membuka dada & lengan depan.'
+            },
+            {
+                id: 'es_childpose',
+                name: 'Child’s Pose (Relaksasi Sistem Saraf)',
+                target: 'Tahan 60 detik',
+                cue: 'Duduk di atas tumit, julurkan tangan ke depan, tarik napas dalam untuk menurunkan ketegangan otot.'
+            }
+        ];
+
+        // Split Routine (Senin-Minggu) dengan jeda pemulihan 24-48 jam
+        const WORKOUT_BY_DAY = {
+            'Senin': {
+                title: 'Latihan Otot: Betis & Perut (Sesi A)',
+                badge: 'Jeda 48 Jam Sebelum Rabu',
+                exercises: [
+                    {
+                        id: 'wo_calf_stand',
+                        name: 'Standing / Elevated Calf Raises',
+                        target: '3 set x 15–20 repetisi',
+                        cue: 'Ujung kaki LURUS netral ke depan. Turun penuh di tepi undakan (2–3 detik) tanpa pantulan, tahan puncak 1 detik.'
+                    },
+                    {
+                        id: 'wo_calf_seat',
+                        name: 'Seated / Bent-Knee Calf Raises',
+                        target: '3 set x 15 repetisi',
+                        cue: 'Duduk dengan beban ransel/galon di atas lutut untuk mengisolasi otot soleus (betis bagian bawah).'
+                    },
+                    {
+                        id: 'wo_leg_raise',
+                        name: 'Lying / Hanging Leg Raises',
+                        target: '3 set x 12–15 repetisi',
+                        cue: 'Angkat kaki lurus terkontrol untuk perut bawah; turunkan perlahan tanpa pinggang terangkat.'
+                    },
+                    {
+                        id: 'wo_bicycle',
+                        name: 'Bicycle Crunches',
+                        target: '3 set x 20 repetisi',
+                        cue: 'Putar bahu menuju lutut berlawanan secara terkendali, fokus kontraksi perut dan obliques.'
+                    },
+                    {
+                        id: 'wo_plank',
+                        name: 'Plank (Postur Posterior Pelvic Tilt)',
+                        target: '3 set x 45–60 detik',
+                        cue: 'Tubuh garis lurus, kencangkan bokong & perut. Pinggul tidak boleh naik tinggi atau melengkung ke bawah.'
+                    }
+                ]
+            },
+            'Selasa': {
+                title: 'Latihan Otot: Tangan & Tubuh Atas',
+                badge: 'Jeda Betis & Perut 48 Jam',
+                exercises: [
+                    {
+                        id: 'wo_bicep',
+                        name: 'Bicep Curls (Dumbbell / Tas Beban / Band)',
+                        target: '3 set x 10–12 repetisi',
+                        cue: 'Siku rapat di sisi tubuh, angkat penuh tanpa mengayun punggung, turunkan perlahan selama 3 detik.'
+                    },
+                    {
+                        id: 'wo_diamond',
+                        name: 'Diamond Push-ups / Chair Dips',
+                        target: '3 set x 10–12 repetisi',
+                        cue: 'Fokus menekan menggunakan otot triceps (lengan belakang). Jaga siku tetap terkontrol.'
+                    },
+                    {
+                        id: 'wo_pushup',
+                        name: 'Standard / Decline Push-ups',
+                        target: '3 set x 10–12 repetisi',
+                        cue: 'Tubuh lurus sejajar, turunkan dada mendekati lantai, dorong kuat untuk membangun ketebalan tubuh atas.'
+                    },
+                    {
+                        id: 'wo_backext',
+                        name: 'Prone Back Extension / Superman Hold',
+                        target: '3 set x 12 repetisi (tahan 2 dtk)',
+                        cue: 'Tengkurap, angkat dada dan lengan perlahan untuk menyeimbangkan kekuatan punggung atas & postur.'
+                    }
+                ]
+            },
+            'Rabu': {
+                title: 'Latihan Otot: Betis & Perut (Sesi B)',
+                badge: 'Jeda 48 Jam Terpenuhi',
+                exercises: [
+                    {
+                        id: 'wo_calf_stand_r',
+                        name: 'Standing / Single-Leg Calf Raises',
+                        target: '3 set x 15–20 repetisi',
+                        cue: 'Ujung kaki lurus ke depan. Jika 2 kaki terasa ringan, lakukan 1 kaki bergantian dengan pegangan dinding.'
+                    },
+                    {
+                        id: 'wo_calf_seat_r',
+                        name: 'Seated / Bent-Knee Calf Raises',
+                        target: '3 set x 15 repetisi',
+                        cue: 'Lutut ditekuk 90° dengan beban di atas paha, angkat tumit setinggi mungkin dengan kontrol penuh.'
+                    },
+                    {
+                        id: 'wo_leg_raise_r',
+                        name: 'Lying / Hanging Leg Raises',
+                        target: '3 set x 12–15 repetisi',
+                        cue: 'Kunci punggung bawah tetap menempel di lantai saat menurunkan kaki secara perlahan.'
+                    },
+                    {
+                        id: 'wo_bicycle_r',
+                        name: 'Bicycle Crunches',
+                        target: '3 set x 20 repetisi',
+                        cue: 'Jangan menarik leher dengan tangan; gunakan rotasi otot perut.'
+                    },
+                    {
+                        id: 'wo_plank_r',
+                        name: 'Plank (Kunci Core Maksimal)',
+                        target: '3 set x 45–60 detik',
+                        cue: 'Pertahankan garis lurus dari tumit ke bahu dan napas teratur.'
+                    }
+                ]
+            },
+            'Kamis': {
+                title: 'Latihan Otot: Tangan & Tubuh Atas (Sesi B)',
+                badge: 'Jeda Lengan 48 Jam Terpenuhi',
+                exercises: [
+                    {
+                        id: 'wo_bicep_k',
+                        name: 'Hammer / Bicep Curls',
+                        target: '3 set x 10–12 repetisi',
+                        cue: 'Kontrol penuh fase turun (eksentrik 3 detik) untuk memaksimalkan robekan mikro serat otot lengan.'
+                    },
+                    {
+                        id: 'wo_tricep_k',
+                        name: 'Chair Dips / Close-Grip Push-ups',
+                        target: '3 set x 10–12 repetisi',
+                        cue: 'Jaga bahu tetap turun (tidak terangkat ke telinga) dan dorong hingga lengan lurus penuh.'
+                    },
+                    {
+                        id: 'wo_pushup_k',
+                        name: 'Tempo Push-ups (Turun 3 Detik)',
+                        target: '3 set x 8–12 repetisi',
+                        cue: 'Perlambat gerakan turun untuk meningkatkan tegangan mekanis tanpa perlu alat berat.'
+                    },
+                    {
+                        id: 'wo_backext_k',
+                        name: 'Prone Y-T-W Raises / Back Extension',
+                        target: '3 set x 12 repetisi',
+                        cue: 'Memperkuat bahu belakang dan punggung atas agar postur tetap tegap.'
+                    }
+                ]
+            },
+            'Jumat': {
+                title: 'Latihan Otot: Betis & Perut (Sesi C)',
+                badge: 'Jeda 48 Jam Terpenuhi',
+                exercises: [
+                    {
+                        id: 'wo_calf_stand_j',
+                        name: 'Elevated Paused Calf Raises',
+                        target: '3 set x 15–20 repetisi',
+                        cue: 'Berikan jeda berhenti 2 detik di posisi paling bawah sebelum mengangkat tumit agar murni tenaga otot.'
+                    },
+                    {
+                        id: 'wo_calf_seat_j',
+                        name: 'Seated Calf Raises',
+                        target: '3 set x 15 repetisi',
+                        cue: 'Fokus pada kontraksi penuh di puncak gerakan.'
+                    },
+                    {
+                        id: 'wo_leg_raise_j',
+                        name: 'Lying Leg Raises + Reverse Crunch',
+                        target: '3 set x 12–15 repetisi',
+                        cue: 'Angkat sedikit pinggul di puncak gerakan untuk kontraksi perut bawah lebih dalam.'
+                    },
+                    {
+                        id: 'wo_plank_j',
+                        name: 'Plank + Shoulder Taps Perlahan',
+                        target: '3 set x 45–60 detik',
+                        cue: 'Jaga pinggul tetap stabil menghadap lantai tanpa bergoyang ke kiri atau kanan.'
+                    }
+                ]
+            },
+            'Sabtu': {
+                title: 'Pemulihan Aktif & Mobilitas Penuh',
+                badge: 'Pemulihan Tendon & Sendi',
+                exercises: [
+                    {
+                        id: 'wo_sabtu_walk',
+                        name: 'Jalan Santai / Aktivitas Ringan',
+                        target: '15–20 menit',
+                        cue: 'Melancarkan aliran darah ke betis dan kaki untuk mempercepat pembersihan sisa metabolisme latihan.'
+                    },
+                    {
+                        id: 'wo_sabtu_ankle',
+                        name: 'Ankle Mobility & Calf Foam/Hand Massage',
+                        target: '5–10 menit',
+                        cue: 'Pijat lembut area betis dan gerakkan pergelangan kaki memutar untuk menjaga kelenturan tendon Achilles.'
+                    }
+                ]
+            },
+            'Minggu': {
+                title: 'Istirahat Penuh (Total Recovery Day)',
+                badge: 'Pemulihan Sistem Saraf Pusat',
+                exercises: [
+                    {
+                        id: 'wo_minggu_rest',
+                        name: 'Istirahat Total Tanpa Beban',
+                        target: 'Sepanjang Hari',
+                        cue: 'Biarkan seluruh serat otot betis, tangan, dan perut pulih 100% sebelum memulai siklus Senin.'
+                    },
+                    {
+                        id: 'wo_minggu_sleep',
+                        name: 'Target Tidur Berkualitas 7–8 Jam',
+                        target: 'Malam Hari',
+                        cue: 'Puncak sintesis protein dan hormon pertumbuhan (HGH) terjadi saat tidur nyenyak.'
+                    }
+                ]
+            }
+        };
+
+        const DAILY_MEALS = [
+            {
+                id: 'meal_pagi',
+                time: '06.30 – 08.00 WIT',
+                title: 'Sesi Pagi (Setelah Peregangan Dinamis)',
+                menu: '5–6 sdm Oatmeal Instan seduh + 3 sdm Susu Bubuk Full Cream + 1 sdm Selai Kacang',
+                note: 'Alternatif: 1 piring Nasi + Ikan + tutup dengan 1 gelas Susu Full Cream.'
+            },
+            {
+                id: 'meal_siang',
+                time: '12.00 – 13.30 WIT',
+                title: 'Sesi Siang (Makan Utama)',
+                menu: '1 piring penuh Nasi (tambah 3–4 sdm dari porsi biasa) + 1–2 potong Ikan + sayur/kuah',
+                note: 'Mengisi penuh cadangan glikogen otot sebelum latihan sore.'
+            },
+            {
+                id: 'meal_pra',
+                time: '15.30 WIT',
+                title: 'Camilan Pra-Latihan Sore (30–45 Mnt Sebelum Latihan)',
+                menu: '3–4 keping Biskuit Gandum + olesan Selai Kacang',
+                note: 'Sumber karbohidrat dan energi cepat agar tenaga saat latihan otot tidak cepat habis.'
+            },
+            {
+                id: 'meal_pasca',
+                time: '17.30 WIT',
+                title: 'Pemulihan Pasca-Latihan Sore (Golden Window)',
+                menu: '1 gelas Susu Bubuk Full Cream (4 sdm) + 1 genggam Kacang Tanah Panggang kemasan',
+                note: 'Memicu sintesis protein otot dan menambah surplus kalori padat tanpa membuat perut begah.'
+            },
+            {
+                id: 'meal_malam',
+                time: '19.30 – 20.30 WIT',
+                title: 'Sesi Malam (Makan Utama Penutup)',
+                menu: '1 piring Nasi + Ikan dengan porsi cukup',
+                note: 'Beri jeda minimal 1,5 jam setelah makan malam sebelum tidur agar pencernaan nyaman.'
+            }
+        ];
+
+        const MONTHLY_GROCERIES = [
+            {
+                id: 'groc_milk',
+                name: 'Susu Bubuk Full Cream (Indomilk / Dancow Full Cream)',
+                qty: '2 – 3 kotak @ 800g',
+                purpose: 'Kalori cair, lemak sehat, kalsium & protein susu untuk pemakaian 2 gelas/hari.'
+            },
+            {
+                id: 'groc_oat',
+                name: 'Oatmeal Instan (Quaker / Mr. Oat)',
+                qty: '1 – 2 bungkus @ 800g',
+                purpose: 'Karbohidrat kompleks lambat serap untuk sarapan praktis setelah peregangan pagi.'
+            },
+            {
+                id: 'groc_biscuit',
+                name: 'Biskuit Gandum (Roma Sari Gandum / Malkist)',
+                qty: '4 – 5 bungkus besar',
+                purpose: 'Bahan bakar energi cepat 30–45 menit sebelum latihan otot sore.'
+            },
+            {
+                id: 'groc_pb',
+                name: 'Selai Kacang Kemasan (Morin / sejenisnya)',
+                qty: '2 kemasan @ 250g',
+                purpose: 'Olesan biskuit & campuran oatmeal; sangat padat kalori dan lemak sehat.'
+            },
+            {
+                id: 'groc_nuts',
+                name: 'Kacang Tanah Panggang Kemasan (Garuda Rosta / Atom)',
+                qty: '4 – 6 bungkus besar',
+                purpose: 'Camilan tinggi kalori & protein nabati pasca-latihan sore (150–250 kkal/genggam).'
+            }
+        ];
+
+        // ==========================================
+        // 2. STATE & STORAGE MANAGEMENT
+        // ==========================================
+        const STORAGE_KEY = 'circadianfit_id_v1';
+        let appState = {
+            selectedDay: DAYS[new Date().getDay()],
+            completedByDay: {}, // { 'Senin': { 'ms_catcow': true, ... } }
+            waterByDay: {},     // { 'Senin': 4 }
+            groceries: {}       // { 'groc_milk': true }
+        };
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState = { ...appState, ...parsed };
+                }
+            } catch (e) {
+                console.error('Gagal memuat data tersimpan:', e);
+            }
+            // Pastikan hari terpilih valid
+            if (!DAYS.includes(appState.selectedDay)) {
+                appState.selectedDay = DAYS[new Date().getDay()];
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Gagal menyimpan data:', e);
+            }
+        }
+
+        function isItemChecked(itemId) {
+            const dayMap = appState.completedByDay[appState.selectedDay] || {};
+            return !!dayMap[itemId];
+        }
+
+        function toggleCheckItem(itemId) {
+            if (!appState.completedByDay[appState.selectedDay]) {
+                appState.completedByDay[appState.selectedDay] = {};
+            }
+            const current = !!appState.completedByDay[appState.selectedDay][itemId];
+            appState.completedByDay[appState.selectedDay][itemId] = !current;
+            saveState();
+            renderAll();
+        }
+
+        function toggleGroceryItem(itemId) {
+            appState.groceries[itemId] = !appState.groceries[itemId];
+            saveState();
+            renderGroceries();
+        }
+
+        function updateWater(delta) {
+            const current = appState.waterByDay[appState.selectedDay] || 0;
+            const next = Math.max(0, Math.min(16, current + delta));
+            appState.waterByDay[appState.selectedDay] = next;
+            saveState();
+            renderWater();
+        }
+
+        function resetDailyProgress() {
+            appState.completedByDay[appState.selectedDay] = {};
+            appState.waterByDay[appState.selectedDay] = 0;
+            saveState();
+            renderAll();
+            showToast(`Progres hari ${appState.selectedDay} telah direset.`);
+        }
+
+        // ==========================================
+        // 3. JAM BIOLOGIS (WIT) & LIVE CLOCK
+        // ==========================================
+        function updateCircadianClock() {
+            const now = new Date();
+            // Format waktu lokal pengguna / WIT
+            const hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('liveClock').textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} WIT`;
+
+            const badgeEl = document.getElementById('circadianBadge');
+            const titleEl = document.getElementById('phaseTitle');
+            const descEl = document.getElementById('phaseDesc');
+
+            if (hours >= 6 && hours < 9) {
+                badgeEl.textContent = 'Fase Pagi • Aktivasi';
+                badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 inline-block mt-0.5';
+                titleEl.textContent = 'Fase Pagi (06.00 – 08.00): Mobilitas & Sarapan';
+                descEl.textContent = 'Suhu tubuh mulai naik dan kortisol alami meningkat. Waktu ideal untuk peregangan dinamis, melumasi sendi, dan mengisi nutrisi pagi.';
+            } else if (hours >= 9 && hours < 15) {
+                badgeEl.textContent = 'Fase Siang • Glikogen';
+                badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 inline-block mt-0.5';
+                titleEl.textContent = 'Fase Siang (12.00 – 13.30): Pengisian Energi Utama';
+                descEl.textContent = 'Fokus pada makan siang porsi penuh (Nasi + Ikan) dan hidrasi bertahap agar cadangan energi otot siap untuk sesi sore.';
+            } else if (hours >= 15 && hours < 19) {
+                badgeEl.textContent = 'Fase Sore • Puncak Otot';
+                badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 inline-block mt-0.5';
+                titleEl.textContent = 'Fase Sore (15.30 – 18.00): Puncak Suhu Inti & Hipertrofi';
+                descEl.textContent = 'Kekuatan genggaman, efisiensi neuromuskular, dan suhu inti tubuh berada di titik puncak. Waktu terbaik untuk latihan beban dan nutrisi pemulihan.';
+            } else {
+                badgeEl.textContent = 'Fase Malam • HGH Recovery';
+                badgeEl.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 inline-block mt-0.5';
+                titleEl.textContent = 'Fase Malam (19.30 – Tidur): Perbaikan Serat Otot';
+                descEl.textContent = 'Kunci asupan protein malam minimal 1,5 jam sebelum tidur. Tidur 7–8 jam memaksimalkan produksi Human Growth Hormone (HGH).';
+            }
+        }
+
+        // ==========================================
+        // 4. BUILT-IN TIMER (WEB AUDIO BEEP)
+        // ==========================================
+        let timerDefault = 45;
+        let timerRemaining = 45;
+        let timerInterval = null;
+
+        function playBeep() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.45);
+            } catch (e) {
+                // Abaikan jika browser memblokir audio otomatis
+            }
+        }
+
+        function formatTime(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function setTimerPreset(seconds) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerDefault = seconds;
+            timerRemaining = seconds;
+            document.getElementById('timerDisplay').textContent = formatTime(timerRemaining);
+            document.getElementById('timerToggleText').textContent = 'Mulai Timer';
+
+            // Update preset button highlight
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                if (btn.textContent.includes(String(seconds))) {
+                    btn.className = 'preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition';
+                } else {
+                    btn.className = 'preset-btn py-2 px-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition';
+                }
+            });
+        }
+
+        function toggleTimer() {
+            const btnText = document.getElementById('timerToggleText');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btnText.textContent = 'Lanjutkan';
+            } else {
+                if (timerRemaining <= 0) timerRemaining = timerDefault;
+                btnText.textContent = 'Jeda Timer';
+                timerInterval = setInterval(() => {
+                    timerRemaining--;
+                    document.getElementById('timerDisplay').textContent = formatTime(Math.max(0, timerRemaining));
+                    if (timerRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        btnText.textContent = 'Mulai Ulang';
+                        playBeep();
+                        showToast('Waktu selesai! Siap untuk set berikutnya.');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerRemaining = timerDefault;
+            document.getElementById('timerDisplay').textContent = formatTime(timerRemaining);
+            document.getElementById('timerToggleText').textContent = 'Mulai Timer';
+        }
+
+        // ==========================================
+        // 5. RENDERING KOMPONEN UI
+        // ==========================================
+        function renderDaySelector() {
+            const container = document.getElementById('daySelector');
+            const todayName = DAYS[new Date().getDay()];
+            container.innerHTML = DAYS.map(day => {
+                const isSelected = day === appState.selectedDay;
+                const isToday = day === todayName;
+                const baseClasses = isSelected
+                    ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-sm'
+                    : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800 font-medium';
+                return `
+                    <button onclick="selectDay('${day}')" class="px-3.5 py-2 rounded-xl text-xs border transition shrink-0 flex items-center gap-1.5 ${baseClasses}">
+                        <span>${day}</span>
+                        ${isToday ? `<span class="w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-slate-950' : 'bg-emerald-400'}"></span>` : ''}
+                    </button>
+                `;
+            }).join('');
+
+            document.getElementById('selectedDayLabel').textContent =
+                appState.selectedDay === todayName ? `${appState.selectedDay} (Hari Ini)` : appState.selectedDay;
+            document.getElementById('mealDayBadge').textContent = appState.selectedDay;
+        }
+
+        function selectDay(day) {
+            appState.selectedDay = day;
+            saveState();
+            renderAll();
+        }
+
+        function createChecklistRow(item, accentColor = 'emerald') {
+            const checked = isItemChecked(item.id);
+            return `
+                <label class="flex items-start gap-3 p-4 cursor-pointer hover:bg-slate-800/40 transition select-none">
+                    <div class="pt-0.5">
+                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCheckItem('${item.id}')"
+                            class="w-5 h-5 rounded-md border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500/40 focus:ring-offset-0 cursor-pointer">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <span class="text-xs sm:text-sm font-bold ${checked ? 'line-through text-slate-500' : 'text-slate-100'} transition">
+                                ${item.name}
+                            </span>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-800 text-${accentColor}-300 border border-slate-700/80">
+                                ${item.target}
+                            </span>
+                        </div>
+                        <p class="text-[11px] ${checked ? 'text-slate-600' : 'text-slate-400'} mt-1 leading-relaxed">
+                            ${item.cue}
+                        </p>
+                    </div>
+                </label>
+            `;
+        }
+
+        function renderWorkoutsAndStretches() {
+            // Morning
+            document.getElementById('morningStretchList').innerHTML =
+                MORNING_STRETCHES.map(item => createChecklistRow(item, 'sky')).join('');
+
+            // Afternoon Workout based on selected day
+            const dayWorkout = WORKOUT_BY_DAY[appState.selectedDay] || WORKOUT_BY_DAY['Senin'];
+            document.getElementById('workoutSessionTitle').textContent = dayWorkout.title;
+            document.getElementById('workoutRecoveryTag').textContent = dayWorkout.badge;
+            document.getElementById('afternoonWorkoutList').innerHTML =
+                dayWorkout.exercises.map(item => createChecklistRow(item, 'emerald')).join('');
+
+            // Evening Static Stretches
+            document.getElementById('eveningStretchList').innerHTML =
+                EVENING_STRETCHES.map(item => createChecklistRow(item, 'indigo')).join('');
+        }
+
+        function renderMeals() {
+            const container = document.getElementById('mealScheduleList');
+            container.innerHTML = DAILY_MEALS.map(meal => {
+                const checked = isItemChecked(meal.id);
+                return `
+                    <label class="flex items-start gap-3 p-4 cursor-pointer hover:bg-slate-800/40 transition select-none">
+                        <div class="pt-0.5">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCheckItem('${meal.id}')"
+                                class="w-5 h-5 rounded-md border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500/40 focus:ring-offset-0 cursor-pointer">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">${meal.time}</span>
+                                <span class="text-[10px] text-slate-400 font-medium">${meal.title}</span>
+                            </div>
+                            <div class="text-xs sm:text-sm font-bold mt-1 ${checked ? 'line-through text-slate-500' : 'text-white'}">
+                                ${meal.menu}
+                            </div>
+                            <p class="text-[11px] ${checked ? 'text-slate-600' : 'text-slate-400'} mt-1 leading-relaxed">
+                                ${meal.note}
+                            </p>
+                        </div>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function renderWater() {
+            const count = appState.waterByDay[appState.selectedDay] || 0;
+            const target = 12;
+            const pct = Math.min(100, Math.round((count / target) * 100));
+            document.getElementById('waterCountText').textContent = `${count} / ${target}`;
+            document.getElementById('waterProgressBar').style.width = `${pct}%`;
+        }
+
+        function renderGroceries() {
+            const container = document.getElementById('groceryList');
+            let readyCount = 0;
+
+            container.innerHTML = MONTHLY_GROCERIES.map(item => {
+                const checked = !!appState.groceries[item.id];
+                if (checked) readyCount++;
+                return `
+                    <label class="flex items-start gap-3 p-4 cursor-pointer hover:bg-slate-800/40 transition select-none">
+                        <div class="pt-0.5">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleGroceryItem('${item.id}')"
+                                class="w-5 h-5 rounded-md border-slate-600 bg-slate-800 text-amber-500 focus:ring-amber-500/40 focus:ring-offset-0 cursor-pointer">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                <span class="text-xs sm:text-sm font-bold ${checked ? 'line-through text-slate-500' : 'text-slate-100'}">
+                                    ${item.name}
+                                </span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                                    ${item.qty}
+                                </span>
+                            </div>
+                            <p class="text-[11px] ${checked ? 'text-slate-600' : 'text-slate-400'} mt-1 leading-relaxed">
+                                ${item.purpose}
+                            </p>
+                        </div>
+                    </label>
+                `;
+            }).join('');
+
+            document.getElementById('groceryCountBadge').textContent = `${readyCount}/${MONTHLY_GROCERIES.length} Siap`;
+        }
+
+        function updateDailyProgress() {
+            const dayWorkout = WORKOUT_BY_DAY[appState.selectedDay] || WORKOUT_BY_DAY['Senin'];
+            const allIds = [
+                ...MORNING_STRETCHES.map(i => i.id),
+                ...dayWorkout.exercises.map(i => i.id),
+                ...EVENING_STRETCHES.map(i => i.id),
+                ...DAILY_MEALS.map(i => i.id)
+            ];
+            const completedCount = allIds.filter(id => isItemChecked(id)).length;
+            const pct = allIds.length > 0 ? Math.round((completedCount / allIds.length) * 100) : 0;
+
+            document.getElementById('dailyProgressText').textContent = `${pct}% (${completedCount}/${allIds.length})`;
+            document.getElementById('dailyProgressBar').style.width = `${pct}%`;
+        }
+
+        function renderAll() {
+            renderDaySelector();
+            renderWorkoutsAndStretches();
+            renderMeals();
+            renderWater();
+            renderGroceries();
+            updateDailyProgress();
+        }
+
+        // ==========================================
+        // 6. TAB NAVIGATION & TOAST UTILITY
+        // ==========================================
+        function switchTab(tabName) {
+            ['jadwal', 'nutrisi', 'panduan'].forEach(t => {
+                const section = document.getElementById(`tab-${t}`);
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (t === tabName) {
+                    section.classList.remove('hidden');
+                    navBtn.classList.remove('text-slate-400', 'font-medium');
+                    navBtn.classList.add('text-emerald-400', 'font-semibold');
+                } else {
+                    section.classList.add('hidden');
+                    navBtn.classList.remove('text-emerald-400', 'font-semibold');
+                    navBtn.classList.add('text-slate-400', 'font-medium');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let toastTimeout = null;
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            box.textContent = msg;
+            box.classList.remove('opacity-0');
+            box.classList.add('opacity-100');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.remove('opacity-100');
+                box.classList.add('opacity-0');
+            }, 2600);
+        }
+
+        // ==========================================
+        // 7. INITIALIZATION
+        // ==========================================
+        window.onload = function () {
+            loadState();
+            updateCircadianClock();
+            setInterval(updateCircadianClock, 1000);
+            renderAll();
+        };
+    </script>
+</body>
+</html>
